@@ -1543,10 +1543,10 @@ html { scroll-padding-top: calc(var(--nav-height) + 22px); }
                         <div class="contact-item facebook-static"><span class="contact-icon">f</span><span class="contact-copy"><small>Facebook</small><strong>Matthew Banasihan</strong></span></div>
                     </div>
                 </aside>
-                <form id="contactForm" class="contact-form reveal">
-                    <div class="form-row"><div class="field"><label for="name">Name</label><input id="name" type="text" placeholder="Your name"></div><div class="field"><label for="email">Email</label><input id="email" type="email" placeholder="you@example.com"></div></div>
-                    <div class="field"><label for="subject">Subject</label><input id="subject" type="text" placeholder="Project or message subject"></div>
-                    <div class="field"><label for="messageBox">Message</label><textarea id="messageBox" rows="6" placeholder="Write your message here..."></textarea></div>
+                <form id="contactForm" class="contact-form reveal" action="https://formspree.io/f/xqpeznpv" method="POST">
+                    <div class="form-row"><div class="field"><label for="name">Name</label><input id="name" name="name" type="text" placeholder="Your name"></div><div class="field"><label for="email">Email</label><input id="email" name="email" type="email" placeholder="you@example.com"></div></div>
+                    <div class="field"><label for="subject">Subject</label><input id="subject" name="subject" type="text" placeholder="Project or message subject"></div>
+                    <div class="field"><label for="messageBox">Message</label><textarea id="messageBox" name="message" rows="6" placeholder="Write your message here..."></textarea></div>
                     <button class="btn primary" type="submit">Send Message</button><p class="form-message" id="formMessage"></p>
                 </form>
             </div>
@@ -1803,7 +1803,7 @@ startAutoSlide();
 const contactForm = document.getElementById("contactForm");
 const formMessage = document.getElementById("formMessage");
 
-contactForm.addEventListener("submit", event => {
+contactForm.addEventListener("submit", async event => {
     event.preventDefault();
 
     const name = document.getElementById("name").value.trim();
@@ -1816,8 +1816,26 @@ contactForm.addEventListener("submit", event => {
         return;
     }
 
-    formMessage.textContent = `Thanks, ${name}! Your message has been received.`;
-    contactForm.reset();
+    formMessage.textContent = "Sending...";
+
+    try {
+        const response = await fetch(contactForm.action, {
+            method: "POST",
+            body: new FormData(contactForm),
+            headers: {
+                "Accept": "application/json"
+            }
+        });
+
+        if (response.ok) {
+            formMessage.textContent = `Thanks, ${name}! Your message has been sent.`;
+            contactForm.reset();
+        } else {
+            formMessage.textContent = "Sorry, your message could not be sent. Please try again.";
+        }
+    } catch (error) {
+        formMessage.textContent = "Sorry, your message could not be sent. Please try again.";
+    }
 });
 
 
